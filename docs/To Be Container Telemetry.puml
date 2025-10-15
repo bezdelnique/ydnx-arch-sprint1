@@ -11,27 +11,35 @@ System_Boundary(UserHome, "Дом пользователя") {
     System(SensorLight, "Датчик света на крыльце")
 }
 
-System_Boundary(SubdomainTelemetry, "Поддомен: Телеметрия") {
-    System(TelemetryApi, "API")
-    SystemDb(TelemetryDb, "DB")
-    SystemQueue(TelemetryQueue, "Queue")
+System_Boundary(Domain, "Управление устройствами умного дома") {
+    Container_Boundary(SubdomainTelemetry, "Телеметрия") {
+        Container(TelemetryApi, "API")
+        ContainerDb(TelemetryDb, "DB")
+        ContainerQueue(TelemetryQueue, "Queue")
+    }
+
+    Container_Boundary(SubdomainAdministration, "Администрирование") {
+        ContainerDb(AdministrationDb, "DB")
+    }
+
+    Container_Boundary(ManageDeviceTelemetry, "Управление устройствами") {
+        Container(ManageDeviceApi, "API")
+    }
 }
 
-ContainerDb_Ext(AdministrationDb, "DB Администрирование")
-Container_Ext(ManageDeviceApi, "API Управление устройствами")
 
 Rel(TelemetryApi, TelemetryDb, "Read\Write")
-Rel(TelemetryApi, TelemetryQueue, "Add To")
+Rel(TelemetryApi, TelemetryQueue, "Add To", "Отложенная обработка")
 Rel(TelemetryQueue, TelemetryDb, "Read")
 
-Rel(SensorLight, TelemetryApi, "Отправляет данные")
-Rel(TelemetryApi, SensorLight, "Запрашивает данные")
+Rel(SensorLight, TelemetryApi, "Отправляет данные", "Датчик")
+Rel(TelemetryApi, SensorLight, "Запрашивает данные", "Датчик")
 
-Rel(SensorHeating, TelemetryApi, "Отправляет данные")
-Rel(TelemetryApi, SensorHeating, "Запрашивает данные")
+Rel(SensorHeating, TelemetryApi, "Отправляет данные", "Датчик")
+Rel(TelemetryApi, SensorHeating, "Запрашивает данные", "Датчик")
 
 Rel(AdministrationDb, TelemetryDb, "Replication")
-Rel(ManageDeviceApi, TelemetryApi, "Запрашивает данные")
+Rel(ManageDeviceApi, TelemetryApi, "Запрашивает данные", "Для отчетов телеметрии")
 
 
 

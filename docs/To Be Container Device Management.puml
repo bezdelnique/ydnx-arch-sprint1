@@ -1,0 +1,41 @@
+@startuml
+title "Диаграмма контейнера Управление устройствами приложения Smart Home To Be"
+
+top to bottom direction
+
+!include C4/C4_Container.puml
+
+Person(User, "Пользователь")
+
+System_Boundary(UserHome, "Дом пользователя") {
+    System(SensorHeating, "Датчик отопления")
+    System(SensorLight, "Датчик света на крыльце")
+}
+
+
+System_Boundary(Domain, "Управление устройствами умного дома") {
+    Container_Boundary(SubdomainManageDevice, "Управление устройствами") {
+        System(ManageDeviceApi, "API")
+        SystemDb(ManageDeviceDb, "DB")
+        SystemQueue(ManageDeviceQueue, "Queue")
+    }
+
+    Container_Boundary(SubdomainAdministration, "Администрирование") {
+        SystemDb(AdministrationDb, "DB")
+    }
+}
+
+
+
+Rel(ManageDeviceApi, ManageDeviceDb, "Read")
+Rel(AdministrationDb, ManageDeviceDb, "Replication")
+
+Rel(User, ManageDeviceApi, "Отправляет команду", "Для устройства")
+Rel(ManageDeviceApi, ManageDeviceQueue, "Добавляет команду в очередь")
+Rel(ManageDeviceQueue, SensorLight, "Отправляет команду", "Датчику")
+Rel(ManageDeviceQueue, SensorHeating, "Отправляет команду", "Датчику")
+
+
+
+@enduml
+
