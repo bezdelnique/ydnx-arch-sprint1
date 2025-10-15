@@ -9,31 +9,34 @@ Person(User, "Пользователь")
 
 System_Boundary(UserHome, "Дом пользователя") {
     System(SensorHeating, "Датчик отопления")
-    System(SensorLight, "Датчик света на крыльце")
 }
 
 
 System_Boundary(Domain, "Управление устройствами умного дома") {
     Container_Boundary(SubdomainManageDevice, "Управление устройствами") {
-        System(ManageDeviceApi, "API")
-        SystemDb(ManageDeviceDb, "DB")
-        SystemQueue(ManageDeviceQueue, "Queue")
+        Container(ManageDeviceApi, "API")
+        ContainerDb(ManageDeviceDb, "DB")
+        ContainerQueue(ManageDeviceQueue, "Queue")
     }
 
     Container_Boundary(SubdomainAdministration, "Администрирование") {
-        SystemDb(AdministrationDb, "DB")
+        Container(AdministrationApi, "Api")
+        ContainerDb(AdministrationDb, "DB")
     }
 }
 
 
 
-Rel(ManageDeviceApi, ManageDeviceDb, "Read")
 Rel(AdministrationDb, ManageDeviceDb, "Replication")
+Rel(ManageDeviceQueue, ManageDeviceDb, "Read/Write")
 
-Rel(User, ManageDeviceApi, "Отправляет команду", "Для устройства")
+Rel(AdministrationApi, ManageDeviceApi, "Отправляет команду", "Для устройства")
+
 Rel(ManageDeviceApi, ManageDeviceQueue, "Добавляет команду в очередь")
-Rel(ManageDeviceQueue, SensorLight, "Отправляет команду", "Датчику")
 Rel(ManageDeviceQueue, SensorHeating, "Отправляет команду", "Датчику")
+Rel(ManageDeviceQueue, SensorHeating, "Запрашивает данные", "Состояния датчика")
+
+Rel(User, AdministrationApi, "Отправляет команду", "Для устройства")
 
 
 

@@ -13,9 +13,19 @@ System_Boundary(Domain, "Управление устройствами умно�
         Container(AdministrationApi, "API")
         ContainerDb(AdministrationDb, "DB")
     }
+
+    Container_Boundary(SubdomainManageDevice, "Управление устройствами") {
+        Container(ManageDeviceApi, "API")
+    }
+
+    Container_Boundary(SubdomainTelemetry, "Телеметрия") {
+        Container(TelemetryApi, "API")
+    }
 }
 
 Rel(AdministrationApi, AdministrationDb, "Read\Write")
+Rel(AdministrationApi, TelemetryApi, "Запрашивает данные", "Отчеты, состояние датчика")
+Rel(AdministrationApi, ManageDeviceApi, "Отправить команду", "Датчику")
 
 Rel(Specialist, AdministrationApi, "Управляет данными")
 Rel(User, AdministrationApi, "Управляет данными")
