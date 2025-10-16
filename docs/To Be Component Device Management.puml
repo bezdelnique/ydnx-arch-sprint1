@@ -16,7 +16,10 @@ System_Boundary(UserHome, "Дом пользователя") {
 
 System_Boundary(Domain, "Управление устройствами умного дома") {
     System_Boundary(SubdomainManageDevice, "Управление устройствами") {
-        Container(ManageDeviceApi, "API")
+        Container_Boundary(ManageDeviceApi, "API") {
+            Component("DeviceCommandController", "Управление устройствами", "SpringWeb Controller")
+            Component("DeviceStateController", "Получение состояние", "SpringWeb Controller")
+        }
         ContainerDb(ManageDeviceDb, "DB")
         ContainerQueue(ManageDeviceQueue, "Queue")
     }
@@ -25,6 +28,10 @@ System_Boundary(Domain, "Управление устройствами умно�
         Container(AdministrationApi, "Api")
         ContainerDb(AdministrationDb, "DB")
     }
+
+    System_Boundary(TelemetrySystem, "Телеметрия") {
+        Container(TelemetryApi, "Api")
+    }
 }
 
 
@@ -32,15 +39,14 @@ System_Boundary(Domain, "Управление устройствами умно�
 Rel(AdministrationDb, ManageDeviceDb, "Replication")
 Rel(ManageDeviceQueue, ManageDeviceDb, "Read/Write")
 
-Rel(AdministrationApi, ManageDeviceApi, "Отправляет команду", "Для устройства")
 
-Rel(ManageDeviceApi, ManageDeviceQueue, "Добавляет команду в очередь")
+Rel(DeviceCommandController, ManageDeviceQueue, "Добавляет команду в очередь")
+Rel(DeviceStateController, TelemetryApi, "Запрашивает состояние устройства")
+
 Rel(ManageDeviceQueue, SensorHeating, "Отправляет команду", "Датчику")
-Rel(ManageDeviceQueue, SensorHeating, "Запрашивает данные", "Состояния датчика")
+Rel(ManageDeviceQueue, TelemetryApi, "Отправить обновленное состояние устройства", "Состояние устройства")
 
 Rel(WebApp, AdministrationApi, "Отправляет команду", "Для устройства")
-
-
 
 @enduml
 
