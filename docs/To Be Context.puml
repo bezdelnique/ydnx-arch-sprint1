@@ -8,52 +8,34 @@ top to bottom direction
 Person(User, "Пользователь")
 Person(Specialist, "Специалист компании", "", person2)
 
-System_Boundary(UserHome, "Дом пользователя") {
+System_Boundary(SmartHomeApp, "Приложения использующие API") {
+    System(WebApp, "WebApp")
+}
+
+System_Boundary(SmartHomeApi, "Управление устройствами умного дома") {
+    System(Administration, "Администрирование")
+    System(Telemetry, "Телеметрия")
+    System(ManageDevice, "Управление устройствами")
+}
+
+Boundary(UserHome, "Дом пользователя") {
     System(SensorHeating, "Датчик отопления")
-    System(SensorLight, "Датчик света на крыльце")
-}
-
-System_Boundary(SubdomainTelemetry, "Поддомен: Телеметрия") {
-    System(TelemetryApi, "API")
-    SystemDb(TelemetryDb, "DB")
-    SystemQueue(TelemetryQueue, "Queue")
-}
-
-System_Boundary(SubdomainManageDevice, "Поддомен: Управление устройствами") {
-    System(ManageDeviceApi, "API")
-    SystemDb(ManageDeviceDb, "DB")
-    SystemQueue(ManageDeviceQueue, "Queue")
-}
-
-System_Boundary(SubdomainAdministration, "Поддомен: Администрирование") {
-    System(AdministrationApi, "API")
-    SystemDb(AdministrationDb, "DB")
 }
 
 
-Rel(TelemetryApi, TelemetryDb, "Read\Write")
-Rel(TelemetryApi, TelemetryQueue, "Add To")
-Rel(TelemetryQueue, TelemetryDb, "Read")
+Rel(User, WebApp, "Управляет данными и устройствами")
+Rel(Specialist, WebApp, "Управляет данными и устройствами")
 
-Rel(SensorLight, TelemetryApi, "Отправляет данные")
-Rel(TelemetryApi, SensorLight, "Запрашивает данные")
+Rel(WebApp, Administration, "Управляет данными и устройствами")
 
-Rel(SensorHeating, TelemetryApi, "Отправляет данные")
-Rel(TelemetryApi, SensorHeating, "Запрашивает данные")
+Rel(Administration, Telemetry, "Получение данных телеметрии и состояние устройств")
+Rel(Administration, ManageDevice, "Отправка команд устройству")
 
-Rel(ManageDeviceApi, ManageDeviceDb, "Read")
-Rel(AdministrationApi, AdministrationDb, "Read\Write")
-Rel(AdministrationDb, ManageDeviceDb, "Replication")
-Rel(AdministrationDb, TelemetryDb, "Replication")
-
-Rel(User, ManageDeviceApi, "Отправляет команду", "https")
-Rel(ManageDeviceApi, ManageDeviceQueue, "Добавляет команду в очередь")
-Rel(ManageDeviceQueue, SensorLight, "Отправляет команду")
-Rel(ManageDeviceQueue, SensorHeating, "Отправляет команду")
+Rel(Telemetry, SensorHeating, "Получение состояния устройства")
+Rel(SensorHeating, Telemetry, "Отправка состояния устройства")
+Rel(ManageDevice, SensorHeating, "Отправка команд устройству")
 
 
-Rel(Specialist, AdministrationApi, "Управляет данными")
-Rel(User, AdministrationApi, "Управляет данными")
 
 @enduml
 

@@ -15,15 +15,15 @@ System_Boundary(UserHome, "Дом пользователя") {
 
 
 System_Boundary(Domain, "Управление устройствами умного дома") {
-    Container_Boundary(SubdomainManageDevice, "Управление устройствами") {
-        Component(ManageDeviceApi, "API")
-        ComponentDb(ManageDeviceDb, "DB")
-        ComponentQueue(ManageDeviceQueue, "Queue")
+    System_Boundary(SubdomainManageDevice, "Управление устройствами") {
+        Container(ManageDeviceApi, "API")
+        ContainerDb(ManageDeviceDb, "DB")
+        ContainerQueue(ManageDeviceQueue, "Queue")
     }
 
-    Container_Boundary(SubdomainAdministration, "Администрирование") {
-        Component(AdministrationApi, "Api")
-        ComponentDb(AdministrationDb, "DB")
+    System_Boundary(SubdomainAdministration, "Администрирование") {
+        Container(AdministrationApi, "Api")
+        ContainerDb(AdministrationDb, "DB")
     }
 }
 

@@ -9,21 +9,21 @@ System_Boundary(SmartHomeApp, "Приложения использующие API
     System(WebApp, "WebApp")
 }
 
-System_Boundary(UserHome, "Дом пользователя") {
+System(UserHome, "Дом пользователя") {
     System(SensorHeating, "Датчик отопления")
 }
 
 System_Boundary(Domain, "Управление устройствами умного дома") {
     Container_Boundary(SubdomainTelemetry, "Телеметрия") {
-        Component(TelemetryApi, "API")
-        Component(TelemetryScheduler, "Scheduler")
-        ComponentDb(TelemetryDb, "DB")
-        ComponentQueue(TelemetryQueue, "Queue")
+        Container(TelemetryApi, "API")
+        Container(TelemetryScheduler, "Scheduler")
+        ContainerDb(TelemetryDb, "DB")
+        ContainerQueue(TelemetryQueue, "Queue")
     }
 
     Container_Boundary(SubdomainAdministration, "Администрирование") {
-        Component(AdministrationApi, "API")
-        ComponentDb(AdministrationDb, "DB")
+        Container(AdministrationApi, "API")
+        ContainerDb(AdministrationDb, "DB")
     }
 
 }
