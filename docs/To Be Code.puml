@@ -1,0 +1,23 @@
+@startuml
+
+interface IProtocol
+interface IDevice
+
+class Device
+class DeviceType
+class ZigbeeProtocol
+
+class HeatingDevice {
+    IProtocol protocol
+    DeviceType deviceType
+}
+
+IProtocol <|-- ZigbeeProtocol
+IDevice <|-- HeatingDevice
+
+class DeviceFactory {
+    IDevice create(Device device)
+}
+
+
+@enduml

@@ -1,0 +1,32 @@
+@startchen
+
+entity User {
+
+}
+
+entity House {
+
+}
+
+entity Device {
+    DeviceType
+    DeviceProtocol
+}
+
+entity TelemetryData {
+    device_id : Device
+}
+
+entity DeviceType {
+}
+
+entity DeviceProtocol {
+}
+
+
+User -(1,N)- House
+House -(1,N)- Device
+
+
+
+@endchen
