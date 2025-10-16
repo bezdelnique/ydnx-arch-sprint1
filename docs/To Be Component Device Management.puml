@@ -3,9 +3,11 @@ title "Диаграмма контейнера Управление устрой
 
 top to bottom direction
 
-!include C4/C4_Container.puml
+!include C4/C4_Component.puml
 
-Person(User, "Пользователь")
+System_Boundary(SmartHomeApp, "Приложения использующие API") {
+    System(WebApp, "WebApp")
+}
 
 System_Boundary(UserHome, "Дом пользователя") {
     System(SensorHeating, "Датчик отопления")
@@ -14,14 +16,14 @@ System_Boundary(UserHome, "Дом пользователя") {
 
 System_Boundary(Domain, "Управление устройствами умного дома") {
     Container_Boundary(SubdomainManageDevice, "Управление устройствами") {
-        Container(ManageDeviceApi, "API")
-        ContainerDb(ManageDeviceDb, "DB")
-        ContainerQueue(ManageDeviceQueue, "Queue")
+        Component(ManageDeviceApi, "API")
+        ComponentDb(ManageDeviceDb, "DB")
+        ComponentQueue(ManageDeviceQueue, "Queue")
     }
 
     Container_Boundary(SubdomainAdministration, "Администрирование") {
-        Container(AdministrationApi, "Api")
-        ContainerDb(AdministrationDb, "DB")
+        Component(AdministrationApi, "Api")
+        ComponentDb(AdministrationDb, "DB")
     }
 }
 
@@ -36,7 +38,7 @@ Rel(ManageDeviceApi, ManageDeviceQueue, "Добавляет команду в о
 Rel(ManageDeviceQueue, SensorHeating, "Отправляет команду", "Датчику")
 Rel(ManageDeviceQueue, SensorHeating, "Запрашивает данные", "Состояния датчика")
 
-Rel(User, AdministrationApi, "Отправляет команду", "Для устройства")
+Rel(WebApp, AdministrationApi, "Отправляет команду", "Для устройства")
 
 
 

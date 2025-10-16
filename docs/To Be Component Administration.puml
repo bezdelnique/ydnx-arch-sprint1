@@ -3,10 +3,14 @@ title "Диаграмма контейнера Администрировани�
 
 top to bottom direction
 
-!include C4/C4_Container.puml
+!include C4/C4_Component.puml
 
 Person(User, "Пользователь")
 Person(Specialist, "Специалист компании", "", person2)
+
+System_Boundary(SmartHomeApp, "Приложения использующие API") {
+    System(WebApp, "WebApp")
+}
 
 System_Boundary(Domain, "Управление устройствами умного дома") {
     Container_Boundary("Administration", "Администрирование") {
@@ -27,8 +31,9 @@ Rel(AdministrationApi, AdministrationDb, "Read\Write")
 Rel(AdministrationApi, TelemetryApi, "Запрашивает данные", "Отчеты, состояние датчика")
 Rel(AdministrationApi, ManageDeviceApi, "Отправить команду", "Датчику")
 
-Rel(Specialist, AdministrationApi, "Управляет данными")
-Rel(User, AdministrationApi, "Управляет данными")
+Rel(Specialist, WebApp, "Управляет данными")
+Rel(User, WebApp, "Управляет данными")
+Rel(WebApp, AdministrationApi, "Управляет данными")
 
 
 @enduml

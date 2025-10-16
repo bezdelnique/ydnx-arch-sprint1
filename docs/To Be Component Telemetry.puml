@@ -3,8 +3,11 @@ title "Диаграмма контейнера Телеметрия прилож
 
 top to bottom direction
 
-!include C4/C4_Container.puml
+!include C4/C4_Component.puml
 
+System_Boundary(SmartHomeApp, "Приложения использующие API") {
+    System(WebApp, "WebApp")
+}
 
 System_Boundary(UserHome, "Дом пользователя") {
     System(SensorHeating, "Датчик отопления")
@@ -12,15 +15,15 @@ System_Boundary(UserHome, "Дом пользователя") {
 
 System_Boundary(Domain, "Управление устройствами умного дома") {
     Container_Boundary(SubdomainTelemetry, "Телеметрия") {
-        Container(TelemetryApi, "API")
-        Container(TelemetryScheduler, "Scheduler")
-        ContainerDb(TelemetryDb, "DB")
-        ContainerQueue(TelemetryQueue, "Queue")
+        Component(TelemetryApi, "API")
+        Component(TelemetryScheduler, "Scheduler")
+        ComponentDb(TelemetryDb, "DB")
+        ComponentQueue(TelemetryQueue, "Queue")
     }
 
     Container_Boundary(SubdomainAdministration, "Администрирование") {
-        Container(AdministrationApi, "API")
-        ContainerDb(AdministrationDb, "DB")
+        Component(AdministrationApi, "API")
+        ComponentDb(AdministrationDb, "DB")
     }
 
 }
@@ -35,6 +38,7 @@ Rel(TelemetryQueue, SensorHeating, "Запрос к датчику", "Узнат
 
 Rel(AdministrationDb, TelemetryDb, "Replication")
 Rel(AdministrationApi, TelemetryApi, "Запрашивает данные", "Для отчетов телеметрии")
+Rel(WebApp, AdministrationApi, "Запрашивает данные", "Для отчетов телеметрии")
 
 Rel(TelemetryScheduler, TelemetryQueue, "Запрашивает данные", "Состояние датчика")
 
