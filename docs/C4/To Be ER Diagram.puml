@@ -41,17 +41,16 @@ entity TelemetryData {
 }
 
 User -(1,N)- House
-House -(1,N)- Device
 
-Device -- DeviceType
-Device -- DeviceProtocol
-Device -- Location
+House -(1,N)- Location
+Device -- DeviceSpecification
+Location -(1,N)- Device
 
 DeviceSpecification -(1,N)- DeviceCommand
-DeviceSpecification -1- DeviceProtocol
-DeviceSpecification -1- DeviceType
+DeviceSpecification -- DeviceProtocol
+DeviceSpecification -- DeviceType
 
-DeviceAuthentication -1- Device
+DeviceAuthentication -- Device
 TelemetryData -- Device
 
 
