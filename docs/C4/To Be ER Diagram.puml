@@ -1,32 +1,58 @@
 @startchen
 
 entity User {
-
 }
 
 entity House {
+}
 
+entity Location {
+    LocationType
 }
 
 entity Device {
-    DeviceType
-    DeviceProtocol
 }
 
-entity TelemetryData {
-    device_id : Device
+entity DeviceAuthentication {
+    url : STRING
+    AuthMethod
+    AuthCredentials
 }
 
 entity DeviceType {
+
 }
 
 entity DeviceProtocol {
 }
 
+entity DeviceCommand {
+    DeviceCommandType
+}
+
+entity DeviceSpecification {
+
+}
+
+
+entity TelemetryData {
+    TelemetryDataType
+    value : STRING
+}
 
 User -(1,N)- House
 House -(1,N)- Device
 
+Device -- DeviceType
+Device -- DeviceProtocol
+Device -- Location
+
+DeviceSpecification -(1,N)- DeviceCommand
+DeviceSpecification -1- DeviceProtocol
+DeviceSpecification -1- DeviceType
+
+DeviceAuthentication -1- Device
+TelemetryData -- Device
 
 
 @endchen
