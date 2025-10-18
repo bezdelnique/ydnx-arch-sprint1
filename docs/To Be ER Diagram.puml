@@ -27,17 +27,23 @@ entity DeviceProtocol {
 }
 
 entity DeviceCommand {
-    DeviceCommandType
+
+}
+
+entity DeviceCommandType {
+    UIElement
 }
 
 entity DeviceSpecification {
 
 }
 
-
 entity TelemetryData {
-    TelemetryDataType
     value : STRING
+}
+
+entity TelemetryDataType {
+    RealType
 }
 
 User -(1,N)- House
@@ -46,12 +52,14 @@ House -(1,N)- Location
 Device -- DeviceSpecification
 Location -(1,N)- Device
 
+DeviceCommand -- DeviceCommandType
 DeviceSpecification -(1,N)- DeviceCommand
 DeviceSpecification -- DeviceProtocol
 DeviceSpecification -- DeviceType
 
 DeviceAuthentication -- Device
 TelemetryData -- Device
+TelemetryData -- TelemetryDataType
 
 
 @endchen
