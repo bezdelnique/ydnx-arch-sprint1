@@ -16,11 +16,11 @@ Boundary(UserHome, "Дом пользователя") {
     System(SensorHeating, "Датчик отопления")
 }
 
-
 System_Boundary(Domain, "Управление устройствами умного дома") {
     System_Boundary(SubdomainTelemetry, "Телеметрия") {
         Container(TelemetryApi, "API")
-        Container(TelemetryScheduler, "Scheduler")
+        Container(TelemetryReport, "Report App")
+        ContainerDb(TelemetryDataLakeDb, "DataLake DB")
         ContainerDb(TelemetryDb, "DB")
         ContainerQueue(TelemetryQueue, "Queue")
     }
@@ -34,8 +34,8 @@ System_Boundary(Domain, "Управление устройствами умно�
         Container(ManageDeviceApi, "API")
         ContainerDb(ManageDeviceDb, "DB")
         ContainerQueue(ManageDeviceQueue, "Queue")
+        Container(ManageDeviceScheduler, "Scheduler")
     }
-
 }
 
 
@@ -46,24 +46,27 @@ Rel(WebApp, AdministrationApi, "Отправляет команду", "Для у
 Rel(WebApp, AdministrationApi, "Запрашивает данные", "Для отчетов телеметрии")
 
 Rel(AdministrationApi, AdministrationDb, "Read\Write")
-Rel(AdministrationApi, TelemetryApi, "Запрашивает данные", "Отчеты, состояние датчика")
-Rel(AdministrationApi, ManageDeviceApi, "Отправляет команду", "Для устройства")
+Rel(AdministrationApi, TelemetryApi, "Запрашивает данные", "Телеметрия и отчеты")
+Rel(AdministrationApi, ManageDeviceApi, "Отправляет команду", "Устройству")
+Rel(AdministrationApi, ManageDeviceApi, "Запрашивает состояние", "Устройства")
 Rel(AdministrationDb, TelemetryDb, "Replication")
 Rel(AdministrationDb, ManageDeviceDb, "Replication")
 
 Rel(TelemetryApi, TelemetryDb, "Read\Write")
-Rel(TelemetryApi, TelemetryQueue, "Запрашивает данные", "Состояние датчика")
-Rel(TelemetryQueue, TelemetryDb, "Read\Write")
-Rel(TelemetryQueue, SensorHeating, "Запрос к датчику", "Узнать состояние")
-Rel(TelemetryScheduler, TelemetryQueue, "Запрашивает данные", "Состояние датчика")
-
+Rel(TelemetryApi, TelemetryQueue, "Данные телеметрии")
+Rel(TelemetryQueue, TelemetryDataLakeDb, "Read\Write")
+Rel(TelemetryReport, TelemetryDataLakeDb, "Read\Write")
+Rel(TelemetryReport, TelemetryDb, "Read\Write")
 
 Rel(ManageDeviceApi, ManageDeviceQueue, "Добавляет команду в очередь")
-Rel(ManageDeviceQueue, ManageDeviceDb, "Read/Write")
+Rel(ManageDeviceApi, ManageDeviceDb, "Read\Write")
+Rel(ManageDeviceScheduler, ManageDeviceQueue, "Формирует запрос телеметрии", "Датчику")
+Rel(ManageDeviceQueue, ManageDeviceDb, "Сохраняет текущее состояние", "Датчика")
 Rel(ManageDeviceQueue, SensorHeating, "Отправляет команду", "Датчику")
-Rel(ManageDeviceQueue, SensorHeating, "Запрашивает данные", "Состояния датчика")
+Rel(ManageDeviceQueue, SensorHeating, "Запрашивает данные", "Датчика")
+Rel(ManageDeviceQueue, TelemetryApi, "Отправляет данные телеметрии", "В хранилище")
 
-Rel(SensorHeating, TelemetryApi, "Отправляет данные", "Датчик")
+Rel(SensorHeating, ManageDeviceApi, "Отправляет данные", "Датчик")
 
 
 @enduml

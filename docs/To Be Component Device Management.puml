@@ -13,15 +13,16 @@ System_Boundary(UserHome, "Дом пользователя") {
     System(SensorHeating, "Датчик отопления")
 }
 
-
 System_Boundary(Domain, "Управление устройствами умного дома") {
     System_Boundary(SubdomainManageDevice, "Управление устройствами") {
         Container_Boundary(ManageDeviceApi, "API") {
             Component("DeviceCommandController", "Управление устройствами", "SpringWeb Controller")
-            Component("DeviceStateController", "Получение состояние", "SpringWeb Controller")
+            Component("DeviceStateController", "Получение состояния устройства", "SpringWeb Controller")
+            Component("DeviceDataReceiverController", "Принимает состояния устройства", "SpringWeb Controller")
         }
         ContainerDb(ManageDeviceDb, "DB")
         ContainerQueue(ManageDeviceQueue, "Queue")
+        Container(ManageDeviceScheduler, "Scheduler")
     }
 
     System_Boundary(SubdomainAdministration, "Администрирование") {
@@ -34,19 +35,24 @@ System_Boundary(Domain, "Управление устройствами умно�
     }
 }
 
+Rel(WebApp, AdministrationApi, "Отправляет команду", "Устройству")
+Rel(WebApp, AdministrationApi, "Запрашивает состояние", "Устройства")
 
+Rel(AdministrationApi, DeviceCommandController, "Отправляет команду", "Устройству")
+Rel(AdministrationApi, DeviceStateController, "Запрашивает состояние", "Устройства")
 
 Rel(AdministrationDb, ManageDeviceDb, "Replication")
-Rel(ManageDeviceQueue, ManageDeviceDb, "Read/Write")
-
+Rel(ManageDeviceQueue, ManageDeviceDb, "Сохранение состояния", "Устройства")
 
 Rel(DeviceCommandController, ManageDeviceQueue, "Добавляет команду в очередь")
-Rel(DeviceStateController, TelemetryApi, "Запрашивает состояние устройства")
+Rel(ManageDeviceScheduler, ManageDeviceQueue, "Добавляет команду в очередь", "Телеметрия")
+Rel(DeviceStateController, ManageDeviceDb, "Запрашивает состояние", "Устройства")
 
-Rel(ManageDeviceQueue, SensorHeating, "Отправляет команду", "Датчику")
-Rel(ManageDeviceQueue, TelemetryApi, "Отправить обновленное состояние устройства", "Состояние устройства")
+Rel(ManageDeviceQueue, SensorHeating, "Отправляет команду", "Устройству")
+Rel(ManageDeviceQueue, SensorHeating, "Запрашивает состояние", "Устройства")
+Rel(SensorHeating, DeviceDataReceiverController, "Отправляет состояние", "Устройства")
+Rel(ManageDeviceQueue, TelemetryApi, "Отправляет данные", "Телеметрии")
 
-Rel(WebApp, AdministrationApi, "Отправляет команду", "Для устройства")
 
 @enduml
 

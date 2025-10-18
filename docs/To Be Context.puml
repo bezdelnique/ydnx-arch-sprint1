@@ -28,12 +28,15 @@ Rel(Specialist, WebApp, "Управляет данными и устройств
 
 Rel(WebApp, Administration, "Управляет данными и устройствами")
 
-Rel(Administration, Telemetry, "Получение данных телеметрии и состояние устройств")
+Rel(Administration, Telemetry, "Получение данных телеметрии и отчетов")
 Rel(Administration, ManageDevice, "Отправка команд устройству")
+Rel(Administration, ManageDevice, "Получение данных состояния устройства")
+Rel(ManageDevice, Telemetry, "Отправка данных телеметрии")
 
-Rel(Telemetry, SensorHeating, "Получение состояния устройства")
-Rel(SensorHeating, Telemetry, "Отправка состояния устройства")
+Rel(ManageDevice, SensorHeating, "Получение состояния устройства")
 Rel(ManageDevice, SensorHeating, "Отправка команд устройству")
+
+Rel(SensorHeating, ManageDevice, "Отправка состояния устройства")
 
 
 

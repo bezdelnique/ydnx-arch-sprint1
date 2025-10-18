@@ -16,9 +16,10 @@ System_Boundary(Domain, "Управление устройствами умно�
     System_Boundary("Administration", "Администрирование") {
         Container_Boundary(AdministrationApi, "API"){
             Component("AuthController", "Авторизация", "SpringWeb Controller")
-            Component("AdminPanelController", "Управление данными", "SpringWeb Controller")
-            Component("ManageDeviceController", "Управление устройствами и их состояние", "SpringWeb Controller")
-            Component("TelemetryController", "Данные устройства", "SpringWeb Controller")
+            Component("DeviceController", "Устройства", "SpringWeb Controller")
+            Component("UserController", "Пользователи", "SpringWeb Controller")
+            Component("ManageDeviceController", "Управление устройствами и их состоянием", "SpringWeb Controller")
+            Component("TelemetryController", "Телеметрия и отчеты", "SpringWeb Controller")
         }
         ContainerDb(AdministrationDb, "DB")
     }
@@ -33,12 +34,15 @@ System_Boundary(Domain, "Управление устройствами умно�
 
 }
 
-Rel(AdminPanelController, AdministrationDb, "Read\Write")
+Rel(AuthController, AdministrationDb, "Read\Write")
+Rel(DeviceController, AdministrationDb, "Read\Write")
+Rel(UserController, AdministrationDb, "Read\Write")
 Rel(AdministrationDb, SubdomainManageDevice, "Replication")
 Rel(AdministrationDb, SubdomainTelemetry, "Replication")
 
-Rel(ManageDeviceController, TelemetryApi, "Запрашивает данные", "Отчеты, состояние датчика")
-Rel(TelemetryController, ManageDeviceApi, "Отправить команду", "Датчику")
+Rel(TelemetryController, TelemetryApi, "Запрашивает данные", "Телеметрия и отчеты")
+Rel(ManageDeviceController, ManageDeviceApi, "Запрашивает данные", "Датчика")
+Rel(ManageDeviceController, ManageDeviceApi, "Отправить команду", "Датчику")
 
 Rel(Specialist, WebApp, "Управляет данными, устройствами")
 Rel(User, WebApp, "Управляет данными, устройствами")

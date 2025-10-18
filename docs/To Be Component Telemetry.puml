@@ -9,21 +9,18 @@ System_Boundary(SmartHomeApp, "Приложения использующие API
     System(WebApp, "WebApp")
 }
 
-Boundary(UserHome, "Дом пользователя") {
-    System(SensorHeating, "Датчик отопления")
-}
-
 System_Boundary(Domain, "Управление устройствами умного дома") {
     System_Boundary(SubdomainTelemetry, "Телеметрия") {
         Container_Boundary(TelemetryApi, "API") {
-            Component("TelemetryController", "Возвращает данные телеметрии", "SpringWeb Controller")
-            Component("DeviceStateController", "Возвращает состояние устройства", "SpringWeb Controller")
-            Component("DeviceDataReceiverController", "Прием состояния устройства", "SpringWeb Controller")
+            Component("TelemetryController", "Данные телеметрии", "SpringWeb Controller")
+            Component("ReportController", "Отчеты", "SpringWeb Controller")
+            Component("TelemetryDataReceiverController", "Принимает данные телеметрии", "SpringWeb Controller")
         }
 
-        Container(TelemetryScheduler, "Scheduler")
         ContainerDb(TelemetryDb, "DB")
+        ContainerDb(TelemetryDataLakeDb, "DataLake DB")
         ContainerQueue(TelemetryQueue, "Queue")
+        Container(TelemetryReport, "Формирует отчеты", "SpringCLI Controller")
     }
 
     System_Boundary(SubdomainManageDevice, "Управление устройствами") {
@@ -32,29 +29,30 @@ System_Boundary(Domain, "Управление устройствами умно�
 
     System_Boundary(SubdomainAdministration, "Администрирование") {
         Container(AdministrationApi, "API")
+        Container(AdministrationDb, "Db")
     }
 
 }
 
 
-Rel(WebApp, AdministrationApi, "Запрашивает данные", "Для отчетов телеметрии")
+Rel(WebApp, AdministrationApi, "Запрашивает данные", "Для телеметрии и отчетов")
+
+Rel(AdministrationApi, TelemetryController, "Запрашивает данные", "Телеметрии")
+Rel(AdministrationApi, ReportController, "Запрашивает данные", "Отчетов")
 
 Rel(TelemetryController, TelemetryDb, "Read")
-Rel(DeviceStateController, TelemetryDb, "Read")
-Rel(DeviceDataReceiverController, TelemetryDb, "Read\Write")
+Rel(TelemetryController, TelemetryDataLakeDb, "Read")
+Rel(ReportController, TelemetryDb, "Read")
+Rel(TelemetryDataReceiverController, TelemetryQueue, "Принимает данные", "Телеметрии")
 
-Rel(DeviceStateController, TelemetryQueue, "Запрашивает данные", "Состояние устройства")
-Rel(TelemetryQueue, TelemetryDb, "Read\Write")
-
-Rel(SensorHeating, TelemetryApi, "Отправляет данные", "Устройство")
-Rel(TelemetryQueue, SensorHeating, "Запрос к датчику", "Узнать состояние")
-
+Rel(TelemetryQueue, TelemetryDataLakeDb, "Write")
 Rel(AdministrationDb, TelemetryDb, "Replication")
-Rel(AdministrationApi, TelemetryController, "Запрашивает данные", "Для отчетов телеметрии")
-Rel(ManageDeviceApi, TelemetryController, "Запрашивает данные", "Состояние устройства")
-Rel(ManageDeviceApi, DeviceDataReceiverController, "Отправляет данные", "Состояние устройства")
 
-Rel(TelemetryScheduler, TelemetryQueue, "Запрашивает данные", "Состояние устройства")
+Rel(SubdomainManageDevice, TelemetryDataReceiverController, "Отправляет данные", "Телеметрии")
+
+
+Rel(TelemetryReport, TelemetryDataLakeDb, "Читает сырые данные", "")
+Rel(TelemetryReport, TelemetryDb, "Формирует отчеты", "")
 
 @enduml
 
