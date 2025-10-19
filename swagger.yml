@@ -1,45 +1,233 @@
-swagger: '2.0'
+openapi: 3.0.4
 info:
-  title: Order Service API
-  version: 1.0.0
+  title: Smart Home - OpenAPI 3.0
+  description: |-
+    Управление устройствами умного дома
+  termsOfService: https://smarthome.tech/terms/
+  contact:
+    email: apiteam@smarthome.tech
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.12
+externalDocs:
+  description: Find out more about Swagger
+  url: https://smarthome.tech
+servers:
+  - url: https://smarthome.tech/api/v3
+tags:
+  - name: device
+    description: Everything about Device
+    externalDocs:
+      description: Find out more
+      url: https://smarthome.tech
 paths:
-  /orders:
+
+  /status/{deviceId}:
+    get:
+      tags:
+        - device
+      summary: Find device by ID.
+      description: Returns a single device.
+      operationId: getDeviceStatusById
+      parameters:
+        - name: deviceId
+          in: path
+          description: ID of device to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryDatum'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Device not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - api_key: []
+        - smarthome_auth:
+            - write:device
+            - read:device
+
+  /command/{deviceId}:
     post:
-      summary: Create a new order
-      consumes:
-        - application/json
+      tags:
+        - device
+      summary: Send command
+      description: Send command
+      operationId: sendCommand
       parameters:
-        - in: body
-          name: body
+        - name: deviceId
+          in: path
+          description: ID of device to change state
           required: true
           schema:
-            type: object
-            properties:
-              customer_name:
-                type: string
-              item:
-                type: string
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelemetryData'
       responses:
-        201:
-          description: Order created successfully
-  /orders/{order_id}:
-    put:
-      summary: Update an order
-      consumes:
-        - application/json
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: No file uploaded
+        '404':
+          description: Device not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - smarthome_auth:
+            - write:device
+            - read:device
+
+  /telemetry/{deviceId}:
+    post:
+      tags:
+        - device
+      summary: Send telemetry
+      description: Send telemetry
+      operationId: send
       parameters:
-        - in: path
-          name: order_id
+        - name: deviceId
+          in: path
+          description: ID of device to put telemetry data
           required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelemetryDatum'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: No file uploaded
+        '404':
+          description: Device not found
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - smarthome_auth:
+            - write:device
+            - read:device
+
+components:
+  schemas:
+    TelemetryDatum:
+      required:
+        - telemetryDataList
+      type: object
+      properties:
+        telemetryDataList:
+          type: array
+          items:
+            $ref: '#/components/schemas/TelemetryData'
+
+    TelemetryData:
+      required:
+        - deviceId
+        - value
+        - telemetryType
+      type: object
+      properties:
+        deviceId:
           type: integer
-        - in: body
-          name: body
-          required: true
-          schema:
-            type: object
-            properties:
-              status:
-                type: string
-      responses:
-        200:
-          description: Order updated successfully
+          format: int64
+          example: 10
+        value:
+          type: string
+          example: status
+        telemetryType:
+          $ref: '#/components/schemas/TelemetryType'
+
+    TelemetryType:
+      required:
+        - id
+        - name
+        - realType
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        name:
+          type: string
+          example: state
+        realType:
+          type: string
+          example: integer
+      xml:
+        name: pet
+
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+
+
+  securitySchemes:
+    smarthome_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://smarthome.tech/oauth/authorize
+          scopes:
+            "write:device": modify
+            "read:device": read
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
+
