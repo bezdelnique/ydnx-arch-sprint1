@@ -1,0 +1,26 @@
+@startuml
+title "Диаграмма контекста приложения Smart Home"
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "Пользователь")
+Person(specialist, "Специалист по подключению", "", person2)
+
+System_Boundary(c1, "Приложение Smart Home") {
+    System(SmartHome, "API приложения Smart Home", "Управление отоплением в доме и проверка температуру")
+}
+
+System_Boundary(houseA, "Система отопления в доме") {
+    System(SensorA, "Датчик отопления", "")
+}
+
+Rel(SmartHome, SensorA, "HTTP request")
+
+Rel(user, SmartHome, "Включить\Выключить")
+Rel(user, SmartHome, "Получить текущую температуру")
+Rel(user, SmartHome, "Задать желаемую температуру")
+Rel(specialist, SmartHome, "CRUD операции с датчиком")
+@enduml
+

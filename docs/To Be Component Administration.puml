@@ -1,0 +1,53 @@
+@startuml
+title "Диаграмма контейнера Администрирование приложения Smart Home To Be"
+
+top to bottom direction
+
+!include C4/C4_Component.puml
+
+Person(User, "Пользователь")
+Person(Specialist, "Специалист компании", "", person2)
+
+System_Boundary(SmartHomeApp, "Приложения использующие API") {
+    System(WebApp, "WebApp")
+}
+
+System_Boundary(Domain, "Управление устройствами умного дома") {
+    System_Boundary("Administration", "Администрирование") {
+        Container_Boundary(AdministrationApi, "API"){
+            Component("AuthController", "Авторизация", "SpringWeb Controller")
+            Component("DeviceController", "Устройства", "SpringWeb Controller")
+            Component("UserController", "Пользователи", "SpringWeb Controller")
+            Component("ManageDeviceController", "Управление устройствами и их состоянием", "SpringWeb Controller")
+            Component("TelemetryController", "Телеметрия и отчеты", "SpringWeb Controller")
+        }
+        ContainerDb(AdministrationDb, "DB")
+    }
+
+    System_Boundary(SubdomainManageDevice, "Управление устройствами") {
+        Container(ManageDeviceApi, "API")
+    }
+
+    System_Boundary(SubdomainTelemetry, "Телеметрия") {
+        Container(TelemetryApi, "API")
+    }
+
+}
+
+Rel(AuthController, AdministrationDb, "Read\Write")
+Rel(DeviceController, AdministrationDb, "Read\Write")
+Rel(UserController, AdministrationDb, "Read\Write")
+Rel(AdministrationDb, SubdomainManageDevice, "Replication")
+Rel(AdministrationDb, SubdomainTelemetry, "Replication")
+
+Rel(TelemetryController, TelemetryApi, "Запрашивает данные", "Телеметрия и отчеты")
+Rel(ManageDeviceController, ManageDeviceApi, "Запрашивает данные", "Датчика")
+Rel(ManageDeviceController, ManageDeviceApi, "Отправить команду", "Датчику")
+
+Rel(Specialist, WebApp, "Управляет данными, устройствами")
+Rel(User, WebApp, "Управляет данными, устройствами")
+Rel(WebApp, AdministrationApi, "Управляет данными, устройствами")
+
+
+@enduml
+

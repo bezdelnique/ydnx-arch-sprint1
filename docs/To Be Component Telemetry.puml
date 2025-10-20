@@ -1,0 +1,58 @@
+@startuml
+title "Диаграмма контейнера Телеметрия приложения Smart Home To Be"
+
+top to bottom direction
+
+!include C4/C4_Component.puml
+
+System_Boundary(SmartHomeApp, "Приложения использующие API") {
+    System(WebApp, "WebApp")
+}
+
+System_Boundary(Domain, "Управление устройствами умного дома") {
+    System_Boundary(SubdomainTelemetry, "Телеметрия") {
+        Container_Boundary(TelemetryApi, "API") {
+            Component("TelemetryController", "Данные телеметрии", "SpringWeb Controller")
+            Component("ReportController", "Отчеты", "SpringWeb Controller")
+            Component("TelemetryDataReceiverController", "Принимает данные телеметрии", "SpringWeb Controller")
+        }
+
+        ContainerDb(TelemetryDb, "DB")
+        ContainerDb(TelemetryDataLakeDb, "DataLake DB")
+        ContainerQueue(TelemetryQueue, "Queue")
+        Container(TelemetryReport, "Формирует отчеты", "SpringCLI Controller")
+    }
+
+    System_Boundary(SubdomainManageDevice, "Управление устройствами") {
+        Container(ManageDeviceApi, "API")
+    }
+
+    System_Boundary(SubdomainAdministration, "Администрирование") {
+        Container(AdministrationApi, "API")
+        Container(AdministrationDb, "Db")
+    }
+
+}
+
+
+Rel(WebApp, AdministrationApi, "Запрашивает данные", "Для телеметрии и отчетов")
+
+Rel(AdministrationApi, TelemetryController, "Запрашивает данные", "Телеметрии")
+Rel(AdministrationApi, ReportController, "Запрашивает данные", "Отчетов")
+
+Rel(TelemetryController, TelemetryDb, "Read")
+Rel(TelemetryController, TelemetryDataLakeDb, "Read")
+Rel(ReportController, TelemetryDb, "Read")
+Rel(TelemetryDataReceiverController, TelemetryQueue, "Принимает данные", "Телеметрии")
+
+Rel(TelemetryQueue, TelemetryDataLakeDb, "Write")
+Rel(AdministrationDb, TelemetryDb, "Replication")
+
+Rel(SubdomainManageDevice, TelemetryDataReceiverController, "Отправляет данные", "Телеметрии")
+
+
+Rel(TelemetryReport, TelemetryDataLakeDb, "Читает сырые данные", "")
+Rel(TelemetryReport, TelemetryDb, "Формирует отчеты", "")
+
+@enduml
+

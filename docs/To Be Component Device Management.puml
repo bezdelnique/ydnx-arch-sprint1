@@ -1,0 +1,58 @@
+@startuml
+title "Диаграмма контейнера Управление устройствами приложения Smart Home To Be"
+
+top to bottom direction
+
+!include C4/C4_Component.puml
+
+System_Boundary(SmartHomeApp, "Приложения использующие API") {
+    System(WebApp, "WebApp")
+}
+
+System_Boundary(UserHome, "Дом пользователя") {
+    System(SensorHeating, "Датчик отопления")
+}
+
+System_Boundary(Domain, "Управление устройствами умного дома") {
+    System_Boundary(SubdomainManageDevice, "Управление устройствами") {
+        Container_Boundary(ManageDeviceApi, "API") {
+            Component("DeviceCommandController", "Управление устройствами", "SpringWeb Controller")
+            Component("DeviceStateController", "Получение состояния устройства", "SpringWeb Controller")
+            Component("DeviceDataReceiverController", "Принимает состояния устройства", "SpringWeb Controller")
+        }
+        ContainerDb(ManageDeviceDb, "DB")
+        ContainerQueue(ManageDeviceQueue, "Queue")
+        Container(ManageDeviceScheduler, "Scheduler")
+    }
+
+    System_Boundary(SubdomainAdministration, "Администрирование") {
+        Container(AdministrationApi, "Api")
+        ContainerDb(AdministrationDb, "DB")
+    }
+
+    System_Boundary(TelemetrySystem, "Телеметрия") {
+        Container(TelemetryApi, "Api")
+    }
+}
+
+Rel(WebApp, AdministrationApi, "Отправляет команду", "Устройству")
+Rel(WebApp, AdministrationApi, "Запрашивает состояние", "Устройства")
+
+Rel(AdministrationApi, DeviceCommandController, "Отправляет команду", "Устройству")
+Rel(AdministrationApi, DeviceStateController, "Запрашивает состояние", "Устройства")
+
+Rel(AdministrationDb, ManageDeviceDb, "Replication")
+Rel(ManageDeviceQueue, ManageDeviceDb, "Сохранение состояния", "Устройства")
+
+Rel(DeviceCommandController, ManageDeviceQueue, "Добавляет команду в очередь")
+Rel(ManageDeviceScheduler, ManageDeviceQueue, "Добавляет команду в очередь", "Телеметрия")
+Rel(DeviceStateController, ManageDeviceDb, "Запрашивает состояние", "Устройства")
+
+Rel(ManageDeviceQueue, SensorHeating, "Отправляет команду", "Устройству")
+Rel(ManageDeviceQueue, SensorHeating, "Запрашивает состояние", "Устройства")
+Rel(SensorHeating, DeviceDataReceiverController, "Отправляет состояние", "Устройства")
+Rel(ManageDeviceQueue, TelemetryApi, "Отправляет данные", "Телеметрии")
+
+
+@enduml
+

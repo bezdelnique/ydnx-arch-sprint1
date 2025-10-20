@@ -1,0 +1,127 @@
+@startuml
+
+' ===== Интерфейсы =====
+
+interface IProtocol {
+    + INetworkClient : createNetworkClient()
+}
+
+interface INetworkClient {
+    + send(JSONObject data) : JSONObject
+}
+
+interface IRequestMarshaller {
+    + getCommandRequest(Command, CommandPayload) : JSONObject
+    + fromResponse(JSONObject) : TelemetryData
+}
+
+interface IUIElement {
+}
+
+interface IProtocolDataReceiver {
+    TelemetryData : apply(IDevice, TelemetryPayload)
+}
+
+interface IProtocolDataDispatcher {
+    TelemetryData : send(IDevice, CommandType, CommandPayload)
+}
+
+interface IDevice {
+    List<ICommand> : getCommandList()
+    DeviceType : getDeviceType()
+}
+
+interface ICommand {
+    IUIElement : getUIElement()
+    JSONObject : getRequestPayload()
+    CommandType : getType()
+}
+
+' ===== Классы реализующие интерфейсы =====
+
+class Device
+
+class ProtocolDataDispatcher
+class ProtocolDataReceiver
+
+class ColorWifiCommand
+class SwitchZigbeeCommand
+class ZigbeeProtocol
+class ZigbeeNetworkClient
+class ZigbeeRequestMarshaller
+
+
+' ===== Финальные классы =====
+
+class DeviceType
+record CommandPayload
+record TelemetryData
+
+class DeviceFactory {
+    + IDevice : create(DeviceId device_id)
+}
+
+class ProtocolCommandFactory {
+    + ICommand : create(Device, CommandType)
+}
+
+record AuthCredentials {
+    url : String
+    username : String
+    password : String
+}
+
+
+' ===== Перечисления =====
+enum CommandType {
+    SWITCH
+    COLOR
+    VOLUME
+}
+
+
+' ===== Реализации =====
+
+IDevice <|.. Device
+IProtocol <|.. ZigbeeProtocol
+IRequestMarshaller <|.. ZigbeeRequestMarshaller
+ICommand <|.. SwitchZigbeeCommand
+ICommand <|.. ColorWifiCommand
+IProtocolDataDispatcher <|.. ProtocolDataDispatcher
+IProtocolDataReceiver <|.. ProtocolDataReceiver
+INetworkClient <|.. ZigbeeNetworkClient
+IUIElement <|.. ColorPickerUIElement
+IUIElement <|.. SwitchUIElement
+
+
+' ===== Зависимости и связи =====
+
+DeviceFactory --> Device : creates
+ProtocolCommandFactory --> ICommand : creates
+
+ProtocolDataDispatcher --> IDevice : uses
+ProtocolDataDispatcher --> ICommand : uses
+ProtocolDataDispatcher --> CommandType : uses
+ProtocolDataDispatcher --> TelemetryData : produce
+ProtocolDataDispatcher --> CommandPayload : accept
+ProtocolDataDispatcher --> ProtocolCommandFactory : uses
+ProtocolDataDispatcher --> IRequestMarshaller : uses
+
+ZigbeeProtocol --> INetworkClient : uses
+ZigbeeNetworkClient --> AuthCredentials : uses
+
+ProtocolDataReceiver --> IProtocol : uses
+ProtocolDataReceiver --> IDevice : uses
+ProtocolDataReceiver --> TelemetryData : produce
+ProtocolDataReceiver --> TelemetryPayload : accept
+ProtocolDataReceiver --> IRequestMarshaller : uses
+
+Device --> ICommand : has commands
+Device --> DeviceType : has type
+
+ICommand --> IUIElement : know UI element
+ICommand --> CommandType : has type
+
+
+@enduml
+

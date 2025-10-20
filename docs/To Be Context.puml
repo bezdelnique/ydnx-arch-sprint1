@@ -1,0 +1,44 @@
+@startuml
+title "Диаграмма контекста приложения Smart Home To Be"
+
+top to bottom direction
+
+!include C4/C4_Context.puml
+
+Person(User, "Пользователь")
+Person(Specialist, "Специалист компании", "", person2)
+
+System_Boundary(SmartHomeApp, "Приложения использующие API") {
+    System(WebApp, "WebApp")
+}
+
+System_Boundary(SmartHomeApi, "Управление устройствами умного дома") {
+    System(Administration, "Администрирование")
+    System(Telemetry, "Телеметрия")
+    System(ManageDevice, "Управление устройствами")
+}
+
+Boundary(UserHome, "Дом пользователя") {
+    System(SensorHeating, "Датчик отопления")
+}
+
+
+Rel(User, WebApp, "Управляет данными и устройствами")
+Rel(Specialist, WebApp, "Управляет данными и устройствами")
+
+Rel(WebApp, Administration, "Управляет данными и устройствами")
+
+Rel(Administration, Telemetry, "Получение данных телеметрии и отчетов")
+Rel(Administration, ManageDevice, "Отправка команд устройству")
+Rel(Administration, ManageDevice, "Получение данных состояния устройства")
+Rel(ManageDevice, Telemetry, "Отправка данных телеметрии")
+
+Rel(ManageDevice, SensorHeating, "Получение состояния устройства")
+Rel(ManageDevice, SensorHeating, "Отправка команд устройству")
+
+Rel(SensorHeating, ManageDevice, "Отправка состояния устройства")
+
+
+
+@enduml
+

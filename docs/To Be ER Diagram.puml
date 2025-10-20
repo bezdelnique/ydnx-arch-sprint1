@@ -1,0 +1,65 @@
+@startchen
+
+entity User {
+}
+
+entity House {
+}
+
+entity Location {
+    LocationType
+}
+
+entity Device {
+}
+
+entity DeviceAuthentication {
+    url : STRING
+    AuthMethod
+    AuthCredentials
+}
+
+entity DeviceType {
+
+}
+
+entity DeviceProtocol {
+}
+
+entity DeviceCommand {
+
+}
+
+entity DeviceCommandType {
+    UIElement
+}
+
+entity DeviceSpecification {
+
+}
+
+entity TelemetryData {
+    value : STRING
+}
+
+entity TelemetryDataType {
+    RealType
+}
+
+User -(1,N)- House
+
+House -(1,N)- Location
+Device -- DeviceSpecification
+Location -(1,N)- Device
+
+DeviceCommand -- DeviceCommandType
+DeviceSpecification -(1,N)- DeviceCommand
+DeviceSpecification -- DeviceProtocol
+DeviceSpecification -- DeviceType
+
+DeviceAuthentication -- Device
+TelemetryData -- Device
+TelemetryData -- TelemetryDataType
+
+
+@endchen

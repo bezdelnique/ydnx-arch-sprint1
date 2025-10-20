@@ -1,0 +1,73 @@
+@startuml
+title "Диаграмма контекста приложения Smart Home To Be"
+
+top to bottom direction
+
+!include C4/C4_Container.puml
+
+Person(User, "Пользователь")
+Person(Specialist, "Специалист компании", "", person2)
+
+System_Boundary(SmartHomeApp, "Приложения использующие API") {
+    System(WebApp, "WebApp")
+}
+
+Boundary(UserHome, "Дом пользователя") {
+    System(SensorHeating, "Датчик отопления")
+}
+
+System_Boundary(Domain, "Управление устройствами умного дома") {
+    System_Boundary(SubdomainTelemetry, "Телеметрия") {
+        Container(TelemetryApi, "API")
+        Container(TelemetryReport, "Report App")
+        ContainerDb(TelemetryDataLakeDb, "DataLake DB")
+        ContainerDb(TelemetryDb, "DB")
+        ContainerQueue(TelemetryQueue, "Queue")
+    }
+
+    System_Boundary(SubdomainAdministration, "Администрирование") {
+        Container(AdministrationApi, "API")
+        ContainerDb(AdministrationDb, "DB")
+    }
+
+    System_Boundary(SubdomainManageDevice, "Управление устройствами") {
+        Container(ManageDeviceApi, "API")
+        ContainerDb(ManageDeviceDb, "DB")
+        ContainerQueue(ManageDeviceQueue, "Queue")
+        Container(ManageDeviceScheduler, "Scheduler")
+    }
+}
+
+
+Rel(Specialist, WebApp, "Управляет данными")
+Rel(User, WebApp, "Управляет данными")
+Rel(WebApp, AdministrationApi, "Управляет данными")
+Rel(WebApp, AdministrationApi, "Отправляет команду", "Для устройства")
+Rel(WebApp, AdministrationApi, "Запрашивает данные", "Для отчетов телеметрии")
+
+Rel(AdministrationApi, AdministrationDb, "Read\Write")
+Rel(AdministrationApi, TelemetryApi, "Запрашивает данные", "Телеметрия и отчеты")
+Rel(AdministrationApi, ManageDeviceApi, "Отправляет команду", "Устройству")
+Rel(AdministrationApi, ManageDeviceApi, "Запрашивает состояние", "Устройства")
+Rel(AdministrationDb, TelemetryDb, "Replication")
+Rel(AdministrationDb, ManageDeviceDb, "Replication")
+
+Rel(TelemetryApi, TelemetryDb, "Read\Write")
+Rel(TelemetryApi, TelemetryQueue, "Данные телеметрии")
+Rel(TelemetryQueue, TelemetryDataLakeDb, "Read\Write")
+Rel(TelemetryReport, TelemetryDataLakeDb, "Read\Write")
+Rel(TelemetryReport, TelemetryDb, "Read\Write")
+
+Rel(ManageDeviceApi, ManageDeviceQueue, "Добавляет команду в очередь")
+Rel(ManageDeviceApi, ManageDeviceDb, "Read\Write")
+Rel(ManageDeviceScheduler, ManageDeviceQueue, "Формирует запрос телеметрии", "Датчику")
+Rel(ManageDeviceQueue, ManageDeviceDb, "Сохраняет текущее состояние", "Датчика")
+Rel(ManageDeviceQueue, SensorHeating, "Отправляет команду", "Датчику")
+Rel(ManageDeviceQueue, SensorHeating, "Запрашивает данные", "Датчика")
+Rel(ManageDeviceQueue, TelemetryApi, "Отправляет данные телеметрии", "В хранилище")
+
+Rel(SensorHeating, ManageDeviceApi, "Отправляет данные", "Датчик")
+
+
+@enduml
+
